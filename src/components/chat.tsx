@@ -104,27 +104,31 @@ export default function Chat() {
             </p>
           </div>
         </div>
-        <button
-          onClick={reset}
-          className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:border-neutral-700 hover:text-neutral-200"
-        >
-          New conversation
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setDebugOpen((o) => !o)}
+            className={
+              debugOpen
+                ? "rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-3 py-1.5 text-xs text-indigo-300 transition-colors hover:bg-indigo-500/20"
+                : "rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:border-neutral-700 hover:text-neutral-200"
+            }
+          >
+            Debug: {debugOpen ? "on" : "off"}
+          </button>
+          <button
+            onClick={reset}
+            className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:border-neutral-700 hover:text-neutral-200"
+          >
+            New conversation
+          </button>
+        </div>
       </header>
 
       {debugOpen && (
         <div className="mb-3 rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-medium uppercase tracking-widest text-neutral-500">
-              Engine
-            </span>
-            <button
-              onClick={() => setDebugOpen(false)}
-              className="text-[10px] text-neutral-600 transition-colors hover:text-neutral-400"
-            >
-              hide
-            </button>
-          </div>
+          <span className="text-[10px] font-medium uppercase tracking-widest text-neutral-500">
+            Engine
+          </span>
           <div className="mt-2 flex items-center gap-1">
             {STAGES.map((s, i) => (
               <div key={s} className="flex items-center gap-1">
@@ -173,15 +177,6 @@ export default function Chat() {
           )}
         </div>
       )}
-      {!debugOpen && (
-        <button
-          onClick={() => setDebugOpen(true)}
-          className="mb-3 self-start text-[10px] text-neutral-600 transition-colors hover:text-neutral-400"
-        >
-          show engine
-        </button>
-      )}
-
       <button
         onClick={() => setHintOpen((o) => !o)}
         className="mb-3 self-start text-xs text-neutral-600 underline decoration-neutral-700 underline-offset-2 transition-colors hover:text-neutral-400"

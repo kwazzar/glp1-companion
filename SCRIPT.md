@@ -11,8 +11,8 @@ cp .env.example .env.local   # fill GROQ_API_KEY and SESSION_SECRET with real va
 npm run dev                  # open http://localhost:3000
 ```
 
-- Click "Show demo role" only if you want the persona reminder on camera
-  (it explains the scenario to the reviewer — recommended for the first 5 seconds, then hide it).
+- The persona reminder lives in SCRIPT.md only — nothing on screen reveals
+  the demo setup to the viewer.
 - Start a fresh dialogue with "New conversation" right before take.
 
 ## Messages (in order)

@@ -4,6 +4,18 @@ import { useEffect, useRef, useState } from "react";
 
 type Msg = { role: "user" | "assistant"; text: string };
 
+const STAGES = ["reflect", "explore", "reframe", "cocreate", "close"];
+
+type DebugInfo = {
+  stage: string;
+  turn: number;
+  stageTurns: number;
+  forced: string | null;
+  depressionConcern: boolean;
+  memory: string[];
+  asked: string[];
+};
+
 const PERSONA_HINT =
   "You are demoing: a 36-year-old woman, three months on Zepbound. Fridays used to be " +
   "your ritual — favorite takeout and unwinding after a hard week. Now you rarely think " +
@@ -31,6 +43,8 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [awaiting, setAwaiting] = useState(false);
   const [hintOpen, setHintOpen] = useState(false);
+  const [debugOpen, setDebugOpen] = useState(true);
+  const [debug, setDebug] = useState<DebugInfo | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,7 +63,8 @@ export default function Chat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
       });
-      const data = (await res.json()) as { reply?: string };
+      const data = (await res.json()) as { reply?: string; debug?: DebugInfo };
+      setDebug(data.debug ?? null);
       setMessages((m) => [
         ...m,
         { role: "assistant", text: data.reply ?? "Something went wrong — please try again." },
@@ -69,6 +84,7 @@ export default function Chat() {
       await fetch("/api/chat/reset", { method: "POST" });
     } finally {
       setMessages([]);
+      setDebug(null);
     }
   }
 
@@ -95,6 +111,76 @@ export default function Chat() {
           New conversation
         </button>
       </header>
+
+      {debugOpen && (
+        <div className="mb-3 rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-medium uppercase tracking-widest text-neutral-500">
+              Engine
+            </span>
+            <button
+              onClick={() => setDebugOpen(false)}
+              className="text-[10px] text-neutral-600 transition-colors hover:text-neutral-400"
+            >
+              hide
+            </button>
+          </div>
+          <div className="mt-2 flex items-center gap-1">
+            {STAGES.map((s, i) => (
+              <div key={s} className="flex items-center gap-1">
+                <span
+                  className={
+                    s === debug?.stage
+                      ? "rounded-md bg-indigo-500/20 px-2 py-0.5 text-[10px] font-medium text-indigo-300 ring-1 ring-indigo-500/40"
+                      : "rounded-md px-2 py-0.5 text-[10px] text-neutral-600"
+                  }
+                >
+                  {s}
+                </span>
+                {i < STAGES.length - 1 && <span className="text-[9px] text-neutral-700">→</span>}
+              </div>
+            ))}
+            {debug && (
+              <span className="ml-auto text-[10px] text-neutral-500">
+                turn {debug.turn}/12
+                {debug.forced && (
+                  <span className="ml-1 rounded bg-amber-500/10 px-1.5 py-0.5 text-amber-300">
+                    {debug.forced}
+                  </span>
+                )}
+                {debug.depressionConcern && (
+                  <span className="ml-1 rounded bg-rose-500/10 px-1.5 py-0.5 text-rose-300">
+                    depression_concern
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
+          {debug && debug.memory.length > 0 && (
+            <p className="mt-2 text-[11px] leading-relaxed text-neutral-500">
+              <span className="text-neutral-600">her words:</span>{" "}
+              {debug.memory.map((m, i) => (
+                <span key={i} className="mr-1.5 rounded bg-neutral-800 px-1.5 py-0.5 text-neutral-400">
+                  {m}
+                </span>
+              ))}
+            </p>
+          )}
+          {debug && debug.asked.length > 0 && (
+            <p className="mt-1.5 truncate text-[11px] text-neutral-600">
+              <span className="text-neutral-700">asked:</span> {debug.asked[debug.asked.length - 1]}
+            </p>
+          )}
+        </div>
+      )}
+      {!debugOpen && (
+        <button
+          onClick={() => setDebugOpen(true)}
+          className="mb-3 self-start text-[10px] text-neutral-600 transition-colors hover:text-neutral-400"
+        >
+          show engine
+        </button>
+      )}
 
       <button
         onClick={() => setHintOpen((o) => !o)}

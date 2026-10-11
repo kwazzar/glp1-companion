@@ -29,6 +29,10 @@ npm run dev                  # open http://localhost:3000
 
 ## Also show on camera (quick beats)
 
+0. **Engine debug panel** — keep it open the whole recording: stage pills
+   (reflect → explore → reframe → cocreate → close) light up as the dialogue
+   progresses, turn budget (n/12) ticks, her own words accumulate in memory.
+   This is the engine at work — visible proof the dialogue is steered, not lucky.
 1. **Crisis interception** — after the main run, click "New conversation" and send:
    `Honestly some days I feel hopeless.` → the reply must be the fixed crisis
    message (local emergency services / crisis line) almost instantly, with no

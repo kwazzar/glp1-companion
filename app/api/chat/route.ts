@@ -41,5 +41,16 @@ export async function POST(request: Request) {
     sameSite: "lax",
     path: "/",
   });
-  return NextResponse.json({ reply });
+  return NextResponse.json({
+    reply,
+    debug: {
+      stage: next.stage,
+      turn: next.turn,
+      stageTurns: next.stageTurns,
+      forced: next.forced ?? null,
+      depressionConcern: next.depressionConcern,
+      memory: next.memory,
+      asked: next.asked,
+    },
+  });
 }

@@ -95,9 +95,13 @@ Stages: `reflect → explore → reframe → cocreate → close`.
   in every response.
 - Engine validator: forward-only movement, max one stage per turn; minimum
   1 turn per stage; `close` only reachable after `cocreate`.
-- Anti-stall: if the model proposes the same stage for more than 2 turns in
-  a row OR turn 8 is reached without `cocreate`, the engine force-advances
-  (the reason is passed in `turn_context`).
+- Anti-stall: if the model proposes the same stage for 2+ turns in a row OR
+  turn 8 is reached without `cocreate`, the engine force-advances (the
+  reason is passed in `turn_context`).
+- Confirmed-close (Amendment 2026-10-11): when the user confirms her plan
+  ("feel better", "that is it", "sounds doable"...) in explore/reframe/
+  cocreate, the engine force-closes regardless of the model's proposal —
+  the wrap-up does not depend on the model obeying.
 - Dialogue budget: 8 turns to reach `cocreate`, 12 turns per session max,
   then forced `close`.
 - Malformed model JSON: 1 retry; then fallback — the engine picks the stage

@@ -18,11 +18,15 @@ export function validateTransition(
   proposed: Stage,
   stageTurns: number,
   turn: number,
+  force?: string,
 ): { stage: Stage; forced?: string } {
+  if (force && current !== "close") {
+    return { stage: "close", forced: force };
+  }
   if (turn >= COCREATE_DEADLINE && current !== "close") {
     return { stage: nextStage(current), forced: "budget" };
   }
-  if (proposed === current && stageTurns > 2 && current !== "close") {
+  if (proposed === current && stageTurns >= 2 && current !== "close") {
     return { stage: nextStage(current), forced: "stalled" };
   }
   if (stageTurns < 1) {
@@ -55,9 +59,16 @@ export function appendMemory(
 export function applyModelOutput(
   state: SessionState,
   out: ModelOutput,
+  force?: string,
 ): SessionState {
   const turn = state.turn + 1;
-  const move = validateTransition(state.stage, out.stage, state.stageTurns, turn);
+  const move = validateTransition(
+    state.stage,
+    out.stage,
+    state.stageTurns,
+    turn,
+    force,
+  );
   return {
     ...state,
     turn,

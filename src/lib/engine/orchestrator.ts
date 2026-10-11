@@ -4,6 +4,7 @@ import {
   FALLBACK_REPLY,
   type ModelOutput,
   type SessionState,
+  type Stage,
 } from "./types";
 import {
   applyModelOutput,
@@ -19,6 +20,9 @@ export type GeminiCall = {
 };
 
 const MAX_MESSAGE_LENGTH = 2000;
+const CONFIRM_RE =
+  /feel(s)? a bit better|feel(s)? better|that'?s it|sounds? (doable|like a plan)|let'?s do it|i'?ll (do|try) (it|that)/i;
+const CONFIRM_STAGES: Stage[] = ["explore", "reframe", "cocreate"];
 
 export function parseModelOutput(raw: unknown): ModelOutput | null {
   if (typeof raw !== "object" || raw === null) return null;
@@ -69,10 +73,14 @@ export async function handleMessage(
   const nextStateBase: SessionState = safety.depression
     ? { ...state, depressionConcern: true }
     : state;
+  const confirmed =
+    CONFIRM_RE.test(message) && CONFIRM_STAGES.includes(nextStateBase.stage)
+      ? "confirmed — she just confirmed her plan: this reply is the CLOSE, brief and warm, no new questions"
+      : undefined;
   const system = buildSystemInstruction(nextStateBase);
   const parsed = await callJsonWithRetry(deps.call, system, message);
   if (parsed) {
-    return finish(nextStateBase, parsed.reply, parsed);
+    return finish(nextStateBase, parsed.reply, parsed, confirmed);
   }
   const heuristics = validateTransition(
     nextStateBase.stage,
@@ -82,14 +90,14 @@ export async function handleMessage(
   );
   try {
     const reply = await deps.call.text(system, message);
-    return finish(nextStateBase, reply, { reply, stage: heuristics.stage, user_signal: "" });
+    return finish(nextStateBase, reply, { reply, stage: heuristics.stage, user_signal: "" }, confirmed);
   } catch (err) {
     console.error("[engine] model text fallback failed:", err);
     return finish(nextStateBase, FALLBACK_REPLY, {
       reply: FALLBACK_REPLY,
       stage: heuristics.stage,
       user_signal: "",
-    });
+    }, confirmed);
   }
 }
 
@@ -97,8 +105,9 @@ function finish(
   base: SessionState,
   reply: string,
   out: ModelOutput,
+  force?: string,
 ): { reply: string; state: SessionState } {
-  let next = applyModelOutput(base, out);
+  let next = applyModelOutput(base, out, force);
   next = {
     ...next,
     asked: [...next.asked, reply.slice(0, 120)].slice(-2),

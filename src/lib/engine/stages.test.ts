@@ -45,6 +45,12 @@ describe("validateTransition", () => {
       forced: "stalled",
     });
   });
+  it("force-advances after 2 turns on the same stage", () => {
+    expect(validateTransition("explore", "explore", 2, 4)).toEqual({
+      stage: "reframe",
+      forced: "stalled",
+    });
+  });
   it("force-advances at the cocreate deadline", () => {
     expect(validateTransition("explore", "explore", 1, 8)).toEqual({
       stage: "reframe",
@@ -55,6 +61,16 @@ describe("validateTransition", () => {
     expect(validateTransition("cocreate", "cocreate", 1, 8)).toEqual({
       stage: "close",
       forced: "budget",
+    });
+  });
+  it("engine force closes on user confirmation", () => {
+    expect(validateTransition("cocreate", "cocreate", 0, 6, "confirmed")).toEqual({
+      stage: "close",
+      forced: "confirmed",
+    });
+    expect(validateTransition("reframe", "explore", 1, 5, "confirmed")).toEqual({
+      stage: "close",
+      forced: "confirmed",
     });
   });
 });

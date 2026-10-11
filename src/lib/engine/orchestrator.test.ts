@@ -135,6 +135,19 @@ describe("handleMessage", () => {
     expect(call.textCalls).toBe(1);
     expect(r.reply).toBe("A plain, warm reply.");
   });
+  it("forces close when she confirms her plan in explore or later", async () => {
+    const state: SessionState = { ...DEFAULT_STATE, stage: "explore", turn: 3, stageTurns: 1 };
+    const call = fakeCall({ jsonResults: [out({ stage: "explore" })] });
+    const r = await handleMessage(deps(call), "Yes — chai walk this Friday, 7pm. I already feel a bit better just deciding it.", state);
+    expect(r.state.stage).toBe("close");
+    expect(r.state.forced).toContain("confirmed");
+  });
+  it("does not force close on confirmation in reflect", async () => {
+    const call = fakeCall({ jsonResults: [valid] });
+    const r = await handleMessage(deps(call), "Yes, that's it — I feel better already", DEFAULT_STATE);
+    expect(r.state.stage).toBe("reflect");
+    expect(r.state.forced).toBeUndefined();
+  });
   it("does not leak model-call rejections: json and text both throw", async () => {
     const call = fakeCall({ jsonResults: [new Error("network down")], textResult: new Error("still down") });
     const r = await handleMessage(deps(call), "Fridays feel empty now", DEFAULT_STATE);

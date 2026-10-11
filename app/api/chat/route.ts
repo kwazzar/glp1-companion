@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { decodeState, encodeState } from "@/src/lib/engine/cookie";
 import { handleMessage, parseMessage } from "@/src/lib/engine/orchestrator";
-import { makeOpenAICall } from "@/src/lib/openai";
+import { makeGroqCall } from "@/src/lib/groq";
 
 const COOKIE = "glp_session";
 
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const state = decodeState(jar.get(COOKIE)?.value, secret);
   const { reply, state: next } = await handleMessage(
     {
-      call: makeOpenAICall(process.env.OPENAI_API_KEY ?? ""),
+      call: makeGroqCall(process.env.GROQ_API_KEY ?? ""),
       secret,
     },
     parsed.message,

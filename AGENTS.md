@@ -14,9 +14,9 @@ Test-task demo: an AI Engine that conducts an empathetic, personalized
 English dialogue with a GLP-1 therapy user. Design spec (read before
 changing engine behavior): `docs/superpowers/specs/2026-10-11-ai-engine-design.md`.
 
-- Stack: Next.js 16.4 (App Router), React 19, Tailwind 4, TypeScript, `openai` SDK (model `gpt-4o-mini`, structured JSON output).
+- Stack: Next.js 16.4 (App Router), React 19, Tailwind 4, TypeScript, `openai` SDK pointed at Groq (model `llama-3.3-70b-versatile`, JSON output).
 - Chat dialogue is English; commit messages and `DESCRIPTION.md` are English/RU respectively; discuss with the user in RU/UA.
-- Secrets (`OPENAI_API_KEY`, `SESSION_SECRET`) live in `.env.local` (gitignored). Never commit real keys; `.env.example` holds placeholders only. Keys are used server-side only (`app/api/chat/route.ts`).
+- Secrets (`GROQ_API_KEY`, `SESSION_SECRET`) live in `.env.local` (gitignored). Never commit real keys; `.env.example` holds placeholders only. Keys are used server-side only (`app/api/chat/route.ts`).
 
 ## Architecture convention (lightweight layered / hexagonal)
 

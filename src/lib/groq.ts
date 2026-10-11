@@ -1,25 +1,8 @@
 import OpenAI from "openai";
 import type { GeminiCall } from "./engine/orchestrator";
 
-const MODEL = "gpt-4o-mini";
-
-const RESPONSE_SCHEMA = {
-  name: "engine_reply",
-  strict: true,
-  schema: {
-    type: "object",
-    properties: {
-      reply: { type: "string" },
-      stage: {
-        type: "string",
-        enum: ["reflect", "explore", "reframe", "cocreate", "close"],
-      },
-      user_signal: { type: "string" },
-    },
-    required: ["reply", "stage", "user_signal"],
-    additionalProperties: false,
-  },
-} as const;
+const MODEL = "llama-3.3-70b-versatile";
+const BASE_URL = "https://api.groq.com/openai/v1";
 
 export function extractJson(text: string): unknown | null {
   const start = text.indexOf("{");
@@ -32,16 +15,16 @@ export function extractJson(text: string): unknown | null {
   }
 }
 
-export function makeOpenAICall(apiKey: string): GeminiCall {
+export function makeGroqCall(apiKey: string): GeminiCall {
   async function generate(
     system: string,
     message: string,
     json: boolean,
   ): Promise<string> {
     if (!apiKey) {
-      throw new Error("OPENAI_API_KEY is not set");
+      throw new Error("GROQ_API_KEY is not set");
     }
-    const client = new OpenAI({ apiKey });
+    const client = new OpenAI({ apiKey, baseURL: BASE_URL });
     const response = await client.chat.completions.create({
       model: MODEL,
       messages: [
@@ -50,14 +33,7 @@ export function makeOpenAICall(apiKey: string): GeminiCall {
       ],
       temperature: 0.8,
       max_tokens: 300,
-      ...(json
-        ? {
-            response_format: {
-              type: "json_schema",
-              json_schema: RESPONSE_SCHEMA,
-            },
-          }
-        : {}),
+      ...(json ? { response_format: { type: "json_object" as const } } : {}),
     });
     return response.choices[0]?.message?.content ?? "";
   }

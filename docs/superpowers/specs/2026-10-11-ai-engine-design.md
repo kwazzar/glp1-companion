@@ -28,19 +28,24 @@ Recording the MP4 is done by the user and is not part of implementation.
 ## 2. Stack and Constraints
 
 > Amendment 2026-10-11 (post-implementation): the LLM provider was switched
-> from Gemini (`gemini-flash-latest`, free-tier quota of 20 requests/day made
-> testing and recording impractical) to OpenAI `gpt-4o-mini` via the `openai`
-> SDK. Only the adapter changed (`src/lib/openai.ts`); the engine core, stage
-> machine, cookie state, and orchestrator contracts are unchanged.
+> twice. First Gemini (`gemini-flash-latest`) — free-tier quota of 20
+> requests/day made testing and recording impractical — then OpenAI
+> `gpt-4o-mini` — requires paid billing. Final choice: **Groq**
+> (`llama-3.3-70b-versatile`, ~14,400 free requests/day, OpenAI-compatible
+> API). Only the adapter changed (`src/lib/groq.ts`); the engine core, stage
+> machine, cookie state, and orchestrator contracts are unchanged. JSON mode
+> uses `response_format: json_object` (broadly supported on Groq); reply
+> shape is strictly validated engine-side (`parseModelOutput`) with the
+> existing retry/fallback ladder.
 
 - Next.js 16.4 (App Router), React 19, Tailwind 4, TypeScript — existing scaffold.
-- SDK: `openai`, model `gpt-4o-mini`.
-  - Rationale: pay-per-use without a meaningful daily quota; structured
-    output via `response_format: json_schema` (strict), which returns clean
-    JSON natively.
-  - `systemInstruction` → system message; user message = user message.
+- SDK: `openai` pointed at Groq (`baseURL: https://api.groq.com/openai/v1`),
+  model `llama-3.3-70b-versatile`.
+  - Rationale: free tier with a ceiling that never blocks a demo
+    (~14,400 requests/day); OpenAI-compatible endpoint keeps the adapter thin.
+  - System prompt → system message; user message = user message.
   - temperature ≈ 0.8, max_tokens ≈ 300.
-- Deploy: Vercel. Secret `OPENAI_API_KEY` in env (`.env.local` locally,
+- Deploy: Vercel. Secret `GROQ_API_KEY` in env (`.env.local` locally,
   Vercel Environment Variables in production). The key never reaches the
   client bundle.
 - No database, no auth. Session state lives in a signed httpOnly cookie
@@ -60,7 +65,7 @@ Route Handler (server; holds secrets and state)
    │
    ├─ 1. Safety layer ............ deterministic pre-filter (regex)
    ├─ 2. Prompt assembly ......... system prompt + persona + memory + turn_context
-   ├─ 3. Gemini Flash call ....... JSON mode: {reply, stage, user_signal}
+   ├─ 3. Groq Llama 3.3 70B call .. JSON mode: {reply, stage, user_signal}
    ├─ 4. Stage validator ......... transition rules, fallback to heuristics
    ├─ 5. Memory update ........... user_signal → session profile
    ▼
@@ -187,7 +192,7 @@ Vitest (dev dependency), engine core only — pure functions, no network:
 - Prompt assembly: turn_context and memory land in the prompt; persona present.
 - Cookie codec: signature round-trip, tampered HMAC rejected.
 
-UI and the live Gemini call are verified manually against `SCRIPT.md`
+UI and the live Groq call are verified manually against `SCRIPT.md`
 (acceptance checklist: reach cocreate within ≤8 turns, no advice lists, no
 dose-change suggestions, one question per reply).
 
@@ -250,12 +255,12 @@ reliably on examples).
 
 | Risk | Mitigation |
 |---|---|
-| Gemini returns extra/malformed fields | Strict schema validation; 1 retry; heuristic stage fallback |
+| Model returns extra/malformed fields | Strict shape validation; 1 retry; heuristic stage fallback |
 | Cookie > 4KB | memory ≤ 5 short entries (≤80 chars), asked ≤ 2×120 chars; state ≈1KB (hard bound: 4096B browser cookie limit, size-tested) |
 | Stage drift (demo never reaches cocreate) | force-advance by turn counter; SCRIPT.md rehearses the scenario |
 | Slow Flash responses (JSON mode can't stream) | client typewriter; "typing" indicator |
 | Key leakage | key only in the server-side route handler; env, never bundled |
-| Model deprecation | provider swap isolated to the adapter (done once already: Gemini → OpenAI) |
+| Model deprecation | provider swap isolated to the adapter (done twice already: Gemini → OpenAI → Groq) |
 
 ## 9. Out of Scope
 

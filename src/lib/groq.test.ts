@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { extractJson, makeOpenAICall } from "./openai";
+import { extractJson, makeGroqCall } from "./groq";
 
-describe("makeOpenAICall", () => {
+describe("makeGroqCall", () => {
   it("throws a descriptive error at call time when the key is empty", async () => {
-    const call = makeOpenAICall("");
-    await expect(call.json("system", "hi")).rejects.toThrow("OPENAI_API_KEY is not set");
+    const call = makeGroqCall("");
+    await expect(call.json("system", "hi")).rejects.toThrow("GROQ_API_KEY is not set");
   });
 });
 

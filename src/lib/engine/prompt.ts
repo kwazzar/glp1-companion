@@ -9,6 +9,9 @@ GOAL: help the user discover ONE adaptation that fits her life, in her own words
 HOW YOU TALK
 - 2-4 short sentences per reply. Plain, human language. No headers, no bullet lists.
 - Ask at most ONE question per reply, specific to what she just said.
+- Each question must open a NEW angle. Never re-ask the same thing in
+  different words across turns.
+- Stick to her framing: if she says "Friday", don't shift to "the night".
 - First reflect the emotional meaning, then ask. Never open with "I'm sorry to hear".
 - Never give a list of generic tips (yoga, journaling, hobbies).
 - Weave one of her phrases from <memory> in naturally; never quote her
@@ -54,6 +57,11 @@ export function buildSystemInstruction(state: SessionState): string {
   if (state.memory.length > 0) {
     parts.push(
       `<memory>\n${state.memory.map((m) => `- ${m}`).join("\n")}\n</memory>`,
+    );
+  }
+  if (state.asked.length > 0) {
+    parts.push(
+      `<already_asked>\nQuestions you already asked (do not repeat or rephrase them — open a new angle instead):\n${state.asked.map((q) => `- ${q}`).join("\n")}\n</already_asked>`,
     );
   }
   const flags = state.depressionConcern ? "\nflags: depression_concern" : "";

@@ -16,6 +16,17 @@ const RESPONSE_SCHEMA = {
   required: ["reply", "stage", "user_signal"],
 } as const;
 
+export function extractJson(text: string): unknown | null {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end <= start) return null;
+  try {
+    return JSON.parse(text.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
+
 export function makeGeminiCall(apiKey: string): GeminiCall {
   async function generate(
     system: string,
@@ -32,7 +43,7 @@ export function makeGeminiCall(apiKey: string): GeminiCall {
       config: {
         systemInstruction: system,
         temperature: 0.8,
-        maxOutputTokens: 300,
+        maxOutputTokens: 1024,
         ...(json
           ? { responseMimeType: "application/json", responseSchema: RESPONSE_SCHEMA }
           : {}),
@@ -43,10 +54,15 @@ export function makeGeminiCall(apiKey: string): GeminiCall {
 
   return {
     async json(system, message) {
-      return JSON.parse(await generate(system, message, true));
+      return extractJson(await generate(system, message, true));
     },
     async text(system, message) {
-      return generate(system, message, false);
+      return generate(
+        system +
+          "\n\nIMPORTANT: The structured reply could not be read. Answer now in plain conversational text only — 2-4 short sentences, no JSON, no code fences, no mention of stages or the engine.",
+        message,
+        false,
+      );
     },
   };
 }

@@ -10,6 +10,7 @@ const full: SessionState = {
   stageTurns: 2,
   depressionConcern: true,
   memory: ["a".repeat(80), "b".repeat(80), "c".repeat(80), "d".repeat(80), "e".repeat(80)],
+  asked: ["f".repeat(120), "g".repeat(120)],
 };
 
 describe("cookie codec", () => {

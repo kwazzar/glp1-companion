@@ -72,14 +72,7 @@ export async function handleMessage(
   const system = buildSystemInstruction(nextStateBase);
   const parsed = await callJsonWithRetry(deps.call, system, message);
   if (parsed) {
-    const next = applyModelOutput(nextStateBase, parsed);
-    return {
-      reply: parsed.reply,
-      state:
-        next.turn >= MAX_TURNS
-          ? { ...next, stage: "close", forced: "session-end" }
-          : next,
-    };
+    return finish(nextStateBase, parsed.reply, parsed);
   }
   const heuristics = validateTransition(
     nextStateBase.stage,
@@ -89,31 +82,29 @@ export async function handleMessage(
   );
   try {
     const reply = await deps.call.text(system, message);
-    const next = applyModelOutput(nextStateBase, {
-      reply,
-      stage: heuristics.stage,
-      user_signal: "",
-    });
-    return {
-      reply,
-      state:
-        next.turn >= MAX_TURNS
-          ? { ...next, stage: "close", forced: "session-end" }
-          : next,
-    };
+    return finish(nextStateBase, reply, { reply, stage: heuristics.stage, user_signal: "" });
   } catch (err) {
     console.error("[engine] gemini text fallback failed:", err);
-    const next = applyModelOutput(nextStateBase, {
+    return finish(nextStateBase, FALLBACK_REPLY, {
       reply: FALLBACK_REPLY,
       stage: heuristics.stage,
       user_signal: "",
     });
-    return {
-      reply: FALLBACK_REPLY,
-      state:
-        next.turn >= MAX_TURNS
-          ? { ...next, stage: "close", forced: "session-end" }
-          : next,
-    };
   }
+}
+
+function finish(
+  base: SessionState,
+  reply: string,
+  out: ModelOutput,
+): { reply: string; state: SessionState } {
+  let next = applyModelOutput(base, out);
+  next = {
+    ...next,
+    asked: [...next.asked, reply.slice(0, 120)].slice(-2),
+  };
+  if (next.turn >= MAX_TURNS) {
+    next = { ...next, stage: "close", forced: "session-end" };
+  }
+  return { reply, state: next };
 }

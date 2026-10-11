@@ -8,6 +8,7 @@ export type SessionState = {
   forced?: string;
   depressionConcern: boolean;
   memory: string[];
+  asked: string[];
 };
 
 export type ModelOutput = {
@@ -28,6 +29,7 @@ export const DEFAULT_STATE: SessionState = {
   stageTurns: 0,
   depressionConcern: false,
   memory: [],
+  asked: [],
 };
 
 export const CRISIS_REPLY =

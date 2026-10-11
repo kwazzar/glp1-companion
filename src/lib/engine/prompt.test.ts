@@ -9,6 +9,7 @@ const state: SessionState = {
   stageTurns: 1,
   depressionConcern: true,
   memory: ["friday was my reward", "the week drains me"],
+  asked: ["what did that Friday meal give you besides the food?"],
 };
 
 describe("buildSystemInstruction", () => {
@@ -39,6 +40,14 @@ describe("buildSystemInstruction", () => {
   });
   it("omits the memory block when memory is empty", () => {
     expect(buildSystemInstruction(DEFAULT_STATE)).not.toContain("</memory>");
+  });
+  it("lists already-asked questions with a no-repeat instruction", () => {
+    const s = buildSystemInstruction(state);
+    expect(s).toContain("do not repeat or rephrase");
+    expect(s).toContain("what did that Friday meal give you besides the food?");
+  });
+  it("omits the asked block when nothing was asked yet", () => {
+    expect(buildSystemInstruction(DEFAULT_STATE)).not.toContain("already asked");
   });
   it("includes the forced reason when set", () => {
     const s = buildSystemInstruction({ ...DEFAULT_STATE, forced: "budget" });

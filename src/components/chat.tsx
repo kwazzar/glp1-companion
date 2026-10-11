@@ -65,78 +65,114 @@ export default function Chat() {
   }
 
   async function reset() {
-    await fetch("/api/chat/reset", { method: "POST" });
-    setMessages([]);
+    try {
+      await fetch("/api/chat/reset", { method: "POST" });
+    } finally {
+      setMessages([]);
+    }
   }
 
   return (
-    <main className="mx-auto flex h-dvh w-full max-w-2xl flex-col px-4 py-6">
-      <div className="mb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold">GLP-1 Companion</h1>
+    <main className="mx-auto flex h-dvh w-full max-w-2xl flex-col px-4 pb-4 pt-6">
+      <header className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/15 text-base">
+            🌙
+          </span>
+          <div>
+            <h1 className="text-[15px] font-semibold leading-tight text-neutral-100">
+              GLP-1 Companion
+            </h1>
+            <p className="text-xs leading-tight text-neutral-500">
+              A quiet space to think it through
+            </p>
+          </div>
+        </div>
         <button
           onClick={reset}
-          className="rounded-md border border-neutral-300 px-3 py-1 text-sm text-neutral-600 hover:bg-neutral-100"
+          className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 transition-colors hover:border-neutral-700 hover:text-neutral-200"
         >
           New conversation
         </button>
-      </div>
+      </header>
 
       <button
         onClick={() => setHintOpen((o) => !o)}
-        className="mb-3 self-start text-xs text-neutral-500 underline"
+        className="mb-3 self-start text-xs text-neutral-600 underline decoration-neutral-700 underline-offset-2 transition-colors hover:text-neutral-400"
       >
         {hintOpen ? "Hide demo role" : "Show demo role"}
       </button>
       {hintOpen && (
-        <p className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{PERSONA_HINT}</p>
+        <p className="mb-3 rounded-xl border border-amber-500/15 bg-amber-500/[0.06] p-3 text-[13px] leading-relaxed text-amber-200/80">
+          {PERSONA_HINT}
+        </p>
       )}
 
       <div className="flex-1 space-y-3 overflow-y-auto">
         {messages.length === 0 && !awaiting && (
-          <p className="mt-10 text-center text-sm text-neutral-500">
-            How did this Friday feel compared to the ones before?
-          </p>
+          <div className="mt-16 text-center">
+            <p className="text-2xl">🌙</p>
+            <p className="mt-3 text-sm text-neutral-500">
+              How did this Friday feel compared to the ones before?
+            </p>
+          </div>
         )}
         {messages.map((m, i) => (
           <div key={i} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
-            <Bubble text={m.text} animate={m.role === "assistant" && i === messages.length - 1 && !awaiting} />
+            <Bubble
+              text={m.text}
+              animate={m.role === "assistant" && i === messages.length - 1 && !awaiting}
+            />
           </div>
         ))}
         {awaiting && (
           <div className="flex justify-start">
-            <div className="rounded-2xl bg-neutral-200 px-4 py-2 text-neutral-600">…</div>
+            <div className="flex gap-1.5 rounded-2xl rounded-bl-md bg-neutral-800/80 px-4 py-3">
+              <Dot delay="0ms" />
+              <Dot delay="150ms" />
+              <Dot delay="300ms" />
+            </div>
           </div>
         )}
         <div ref={bottom} />
       </div>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-4 flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
           placeholder="Type a message…"
-          className="flex-1 rounded-xl border border-neutral-300 px-4 py-2 outline-none focus:border-neutral-500"
+          className="flex-1 rounded-2xl border border-neutral-800 bg-neutral-900 px-4 py-2.5 text-sm text-neutral-100 placeholder-neutral-600 outline-none transition-colors focus:border-indigo-500/60"
         />
         <button
           onClick={send}
           disabled={awaiting || !input.trim()}
-          className="rounded-xl bg-neutral-900 px-4 py-2 text-white disabled:opacity-40"
+          className="rounded-2xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-500 disabled:opacity-40"
         >
           Send
         </button>
       </div>
-      <p className="mt-2 text-center text-xs text-neutral-400">
+      <p className="mt-2.5 text-center text-[11px] text-neutral-600">
         Not medical advice. In crisis, contact local emergency services.
       </p>
     </main>
   );
 }
 
+function Dot({ delay }: { delay: string }) {
+  return (
+    <span
+      className="h-1.5 w-1.5 animate-bounce rounded-full bg-neutral-500"
+      style={{ animationDelay: delay }}
+    />
+  );
+}
+
 function Bubble({ text, animate }: { text: string; animate: boolean }) {
   const shown = useTypewriter(text, animate);
   return (
-    <div className="max-w-[80%] rounded-2xl bg-neutral-200 px-4 py-2 whitespace-pre-wrap">
+    <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-neutral-800/80 px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap text-neutral-100">
       {shown}
     </div>
   );

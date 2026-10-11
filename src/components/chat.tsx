@@ -93,7 +93,7 @@ export default function Chat() {
       <header className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-500/15 text-base">
-            🌙
+            🌿
           </span>
           <div>
             <h1 className="text-[15px] font-semibold leading-tight text-neutral-100">
@@ -197,7 +197,7 @@ export default function Chat() {
       <div className="flex-1 space-y-3 overflow-y-auto">
         {messages.length === 0 && !awaiting && (
           <div className="mt-16 text-center">
-            <p className="text-2xl">🌙</p>
+            <p className="text-2xl">🌿</p>
             <p className="mt-3 text-sm text-neutral-500">
               How did this Friday feel compared to the ones before?
             </p>

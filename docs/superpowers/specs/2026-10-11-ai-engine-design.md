@@ -27,15 +27,20 @@ Recording the MP4 is done by the user and is not part of implementation.
 
 ## 2. Stack and Constraints
 
+> Amendment 2026-10-11 (post-implementation): the LLM provider was switched
+> from Gemini (`gemini-flash-latest`, free-tier quota of 20 requests/day made
+> testing and recording impractical) to OpenAI `gpt-4o-mini` via the `openai`
+> SDK. Only the adapter changed (`src/lib/openai.ts`); the engine core, stage
+> machine, cookie state, and orchestrator contracts are unchanged.
+
 - Next.js 16.4 (App Router), React 19, Tailwind 4, TypeScript — existing scaffold.
-- SDK: `@google/genai`, model `gemini-flash-latest`.
-  - Rationale: `gemini-2.5-flash` is marked for deprecation on 2026-10-16;
-    the `gemini-flash-latest` alias tracks the current stable Flash and keeps
-    the demo alive across future deprecations.
-  - `systemInstruction` — system prompt.
-  - `responseMimeType: "application/json"` + `responseSchema` — structured output.
-  - temperature ≈ 0.8, maxOutputTokens ≈ 300 (headroom for the JSON envelope).
-- Deploy: Vercel. Secret `GEMINI_API_KEY` in env (`.env.local` locally,
+- SDK: `openai`, model `gpt-4o-mini`.
+  - Rationale: pay-per-use without a meaningful daily quota; structured
+    output via `response_format: json_schema` (strict), which returns clean
+    JSON natively.
+  - `systemInstruction` → system message; user message = user message.
+  - temperature ≈ 0.8, max_tokens ≈ 300.
+- Deploy: Vercel. Secret `OPENAI_API_KEY` in env (`.env.local` locally,
   Vercel Environment Variables in production). The key never reaches the
   client bundle.
 - No database, no auth. Session state lives in a signed httpOnly cookie
@@ -250,7 +255,7 @@ reliably on examples).
 | Stage drift (demo never reaches cocreate) | force-advance by turn counter; SCRIPT.md rehearses the scenario |
 | Slow Flash responses (JSON mode can't stream) | client typewriter; "typing" indicator |
 | Key leakage | key only in the server-side route handler; env, never bundled |
-| Model deprecation | `gemini-flash-latest` alias tracks the current stable Flash |
+| Model deprecation | provider swap isolated to the adapter (done once already: Gemini → OpenAI) |
 
 ## 9. Out of Scope
 

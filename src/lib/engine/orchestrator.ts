@@ -50,7 +50,7 @@ async function callJsonWithRetry(
     try {
       parsed = parseModelOutput(await call.json(system, message));
     } catch (err) {
-      console.error("[engine] gemini json call failed:", err);
+      console.error("[engine] model call failed:", err);
     }
     if (parsed) return parsed;
   }
@@ -84,7 +84,7 @@ export async function handleMessage(
     const reply = await deps.call.text(system, message);
     return finish(nextStateBase, reply, { reply, stage: heuristics.stage, user_signal: "" });
   } catch (err) {
-    console.error("[engine] gemini text fallback failed:", err);
+    console.error("[engine] model text fallback failed:", err);
     return finish(nextStateBase, FALLBACK_REPLY, {
       reply: FALLBACK_REPLY,
       stage: heuristics.stage,

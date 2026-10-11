@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { extractJson } from "./gemini";
+import { extractJson, makeOpenAICall } from "./openai";
+
+describe("makeOpenAICall", () => {
+  it("throws a descriptive error at call time when the key is empty", async () => {
+    const call = makeOpenAICall("");
+    await expect(call.json("system", "hi")).rejects.toThrow("OPENAI_API_KEY is not set");
+  });
+});
 
 describe("extractJson", () => {
   it("parses a clean JSON object", () => {

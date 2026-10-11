@@ -7,7 +7,7 @@ you what the engine should demonstrate — check it silently as you go.
 ## Setup (before recording)
 
 ```bash
-cp .env.example .env.local   # fill GEMINI_API_KEY and SESSION_SECRET with real values
+cp .env.example .env.local   # fill OPENAI_API_KEY and SESSION_SECRET with real values
 npm run dev                  # open http://localhost:3000
 ```
 

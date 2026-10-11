@@ -16,6 +16,11 @@ type DebugInfo = {
   asked: string[];
 };
 
+const PERSONA_HINT =
+  "A 36-year-old woman, three months on Zepbound. Fridays used to be your ritual — " +
+  "favorite takeout and unwinding after a hard week. Now you rarely think about food, " +
+  "Fridays feel hollow, and you can't explain the emptiness.";
+
 function useTypewriter(target: string, active: boolean): string {
   const [shown, setShown] = useState("");
 
@@ -37,6 +42,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [awaiting, setAwaiting] = useState(false);
+  const [hintOpen, setHintOpen] = useState(false);
   const [debugOpen, setDebugOpen] = useState(true);
   const [debug, setDebug] = useState<DebugInfo | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
@@ -174,6 +180,18 @@ export default function Chat() {
         >
           show engine
         </button>
+      )}
+
+      <button
+        onClick={() => setHintOpen((o) => !o)}
+        className="mb-3 self-start text-xs text-neutral-600 underline decoration-neutral-700 underline-offset-2 transition-colors hover:text-neutral-400"
+      >
+        {hintOpen ? "Hide demo role" : "Show demo role"}
+      </button>
+      {hintOpen && (
+        <p className="mb-3 rounded-xl border border-amber-500/15 bg-amber-500/[0.06] p-3 text-[13px] leading-relaxed text-amber-200/80">
+          {PERSONA_HINT}
+        </p>
       )}
 
       <div className="flex-1 space-y-3 overflow-y-auto">

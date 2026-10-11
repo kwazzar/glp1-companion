@@ -197,8 +197,7 @@ export default function Chat() {
       <div className="flex-1 space-y-3 overflow-y-auto">
         {messages.length === 0 && !awaiting && (
           <div className="mt-16 text-center">
-            <p className="text-2xl">🌿</p>
-            <p className="mt-3 text-sm text-neutral-500">
+            <p className="text-sm text-neutral-500">
               How did this Friday feel compared to the ones before?
             </p>
           </div>

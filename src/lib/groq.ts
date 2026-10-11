@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import type { GeminiCall } from "./engine/orchestrator";
 
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-120b";
 const BASE_URL = "https://api.groq.com/openai/v1";
 
 export function extractJson(text: string): unknown | null {
@@ -32,7 +32,7 @@ export function makeGroqCall(apiKey: string): GeminiCall {
         { role: "user", content: message },
       ],
       temperature: 0.8,
-      max_tokens: 300,
+      max_tokens: 1024,
       ...(json ? { response_format: { type: "json_object" as const } } : {}),
     });
     return response.choices[0]?.message?.content ?? "";

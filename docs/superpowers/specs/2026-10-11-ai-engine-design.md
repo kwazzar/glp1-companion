@@ -31,7 +31,7 @@ Recording the MP4 is done by the user and is not part of implementation.
 > twice. First Gemini (`gemini-flash-latest`) — free-tier quota of 20
 > requests/day made testing and recording impractical — then OpenAI
 > `gpt-4o-mini` — requires paid billing. Final choice: **Groq**
-> (`llama-3.3-70b-versatile`, ~14,400 free requests/day, OpenAI-compatible
+> (`openai/gpt-oss-120b`, ~14,400 free requests/day, OpenAI-compatible
 > API). Only the adapter changed (`src/lib/groq.ts`); the engine core, stage
 > machine, cookie state, and orchestrator contracts are unchanged. JSON mode
 > uses `response_format: json_object` (broadly supported on Groq); reply
@@ -40,11 +40,11 @@ Recording the MP4 is done by the user and is not part of implementation.
 
 - Next.js 16.4 (App Router), React 19, Tailwind 4, TypeScript — existing scaffold.
 - SDK: `openai` pointed at Groq (`baseURL: https://api.groq.com/openai/v1`),
-  model `llama-3.3-70b-versatile`.
+  model `openai/gpt-oss-120b`.
   - Rationale: free tier with a ceiling that never blocks a demo
     (~14,400 requests/day); OpenAI-compatible endpoint keeps the adapter thin.
   - System prompt → system message; user message = user message.
-  - temperature ≈ 0.8, max_tokens ≈ 300.
+  - temperature ≈ 0.8, max_tokens ≈ 1024 (reasoning tokens of gpt-oss count against the completion budget).
 - Deploy: Vercel. Secret `GROQ_API_KEY` in env (`.env.local` locally,
   Vercel Environment Variables in production). The key never reaches the
   client bundle.

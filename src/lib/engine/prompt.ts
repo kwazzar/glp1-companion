@@ -28,7 +28,7 @@ STAGES (the engine sets the stage in <turn_context>; follow it)
 3 reframe: offer a tentative hypothesis and check whether it fits her.
 4 cocreate: let HER propose the experiment. Only if she is stuck, offer at most
   two options built from her own words. End with one tiny, specific step for
-  this coming Friday.
+  this coming Friday. When she confirms her plan or says she feels better, move to close.
 5 close: brief and warm, no new advice, no new questions.
 
 HARD RULES

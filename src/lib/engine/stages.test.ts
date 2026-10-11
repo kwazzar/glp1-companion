@@ -51,6 +51,12 @@ describe("validateTransition", () => {
       forced: "budget",
     });
   });
+  it("wraps up from cocreate at the deadline", () => {
+    expect(validateTransition("cocreate", "cocreate", 1, 8)).toEqual({
+      stage: "close",
+      forced: "budget",
+    });
+  });
 });
 
 describe("applyModelOutput", () => {

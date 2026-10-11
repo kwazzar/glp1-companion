@@ -19,11 +19,7 @@ export function validateTransition(
   stageTurns: number,
   turn: number,
 ): { stage: Stage; forced?: string } {
-  if (
-    turn >= COCREATE_DEADLINE &&
-    current !== "cocreate" &&
-    current !== "close"
-  ) {
+  if (turn >= COCREATE_DEADLINE && current !== "close") {
     return { stage: nextStage(current), forced: "budget" };
   }
   if (proposed === current && stageTurns > 2 && current !== "close") {

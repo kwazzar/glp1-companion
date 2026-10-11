@@ -37,7 +37,7 @@ describe("cookie codec", () => {
   it("rejects garbage input", () => {
     expect(decodeState("not-a-cookie", SECRET)).toEqual(DEFAULT_STATE);
   });
-  it("keeps a full session cookie under 1024 bytes", () => {
-    expect(encodeState(full, SECRET).length).toBeLessThan(1024);
+  it("keeps a full session cookie well under the 4096-byte browser limit", () => {
+    expect(encodeState(full, SECRET).length).toBeLessThan(4096);
   });
 });

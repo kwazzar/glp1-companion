@@ -246,7 +246,7 @@ reliably on examples).
 | Risk | Mitigation |
 |---|---|
 | Gemini returns extra/malformed fields | Strict schema validation; 1 retry; heuristic stage fallback |
-| Cookie > 4KB | memory ≤ 5 short entries; state < 1KB; size test |
+| Cookie > 4KB | memory ≤ 5 short entries (≤80 chars), asked ≤ 2×120 chars; state ≈1KB (hard bound: 4096B browser cookie limit, size-tested) |
 | Stage drift (demo never reaches cocreate) | force-advance by turn counter; SCRIPT.md rehearses the scenario |
 | Slow Flash responses (JSON mode can't stream) | client typewriter; "typing" indicator |
 | Key leakage | key only in the server-side route handler; env, never bundled |

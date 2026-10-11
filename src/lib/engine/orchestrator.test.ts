@@ -129,7 +129,7 @@ describe("handleMessage", () => {
     expect(r.state.forced).toBe("session-end");
   });
   it("does not leak model-call rejections: json throws, text answers", async () => {
-    const call = fakeCall({ jsonResults: [new Error("GEMINI_API_KEY is not set")], textResult: "A plain, warm reply." });
+    const call = fakeCall({ jsonResults: [new Error("GROQ_API_KEY is not set")], textResult: "A plain, warm reply." });
     const r = await handleMessage(deps(call), "Fridays feel empty now", DEFAULT_STATE);
     expect(call.jsonCalls).toBe(2);
     expect(call.textCalls).toBe(1);

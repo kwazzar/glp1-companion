@@ -46,7 +46,12 @@ async function callJsonWithRetry(
   message: string,
 ): Promise<ModelOutput | null> {
   for (let attempt = 0; attempt < 2; attempt++) {
-    const parsed = parseModelOutput(await call.json(system, message));
+    let parsed: ModelOutput | null = null;
+    try {
+      parsed = parseModelOutput(await call.json(system, message));
+    } catch (err) {
+      console.error("[engine] gemini json call failed:", err);
+    }
     if (parsed) return parsed;
   }
   return null;
@@ -96,7 +101,8 @@ export async function handleMessage(
           ? { ...next, stage: "close", forced: "session-end" }
           : next,
     };
-  } catch {
+  } catch (err) {
+    console.error("[engine] gemini text fallback failed:", err);
     const next = applyModelOutput(nextStateBase, {
       reply: FALLBACK_REPLY,
       stage: heuristics.stage,

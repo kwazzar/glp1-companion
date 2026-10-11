@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   CRISIS_REPLY,
   DEFAULT_STATE,
@@ -34,11 +34,8 @@ function fakeCall(opts?: {
     textCalls: 0,
     async json() {
       this.jsonCalls += 1;
-      const next = queue.shift();
-      if (queue.length === 0 && opts?.jsonResults?.length) {
-        // repeat the last canned result for extra calls
-        queue.push(opts.jsonResults[opts.jsonResults.length - 1]);
-      }
+      const next = queue[Math.min(this.jsonCalls - 1, queue.length - 1)];
+      if (next instanceof Error) throw next;
       return next;
     },
     async text() {
@@ -130,5 +127,27 @@ describe("handleMessage", () => {
     expect(r.state.turn).toBe(12);
     expect(r.state.stage).toBe("close");
     expect(r.state.forced).toBe("session-end");
+  });
+  it("does not leak model-call rejections: json throws, text answers", async () => {
+    const call = fakeCall({ jsonResults: [new Error("GEMINI_API_KEY is not set")], textResult: "A plain, warm reply." });
+    const r = await handleMessage(deps(call), "Fridays feel empty now", DEFAULT_STATE);
+    expect(call.jsonCalls).toBe(2);
+    expect(call.textCalls).toBe(1);
+    expect(r.reply).toBe("A plain, warm reply.");
+  });
+  it("does not leak model-call rejections: json and text both throw", async () => {
+    const call = fakeCall({ jsonResults: [new Error("network down")], textResult: new Error("still down") });
+    const r = await handleMessage(deps(call), "Fridays feel empty now", DEFAULT_STATE);
+    expect(r.reply).toBe(FALLBACK_REPLY);
+  });
+  it("logs model failures server-side", async () => {
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const call = fakeCall({ jsonResults: [new Error("network down")], textResult: new Error("still down") });
+      await handleMessage(deps(call), "Fridays feel empty now", DEFAULT_STATE);
+      expect(err).toHaveBeenCalled();
+    } finally {
+      err.mockRestore();
+    }
   });
 });

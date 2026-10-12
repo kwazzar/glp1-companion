@@ -22,6 +22,8 @@ const valid: ModelOutput = {
 type FakeCall = GeminiCall & {
   jsonCalls: number;
   textCalls: number;
+  jsonSystems: string[];
+  textSystems: string[];
 };
 
 function fakeCall(opts?: {
@@ -32,13 +34,17 @@ function fakeCall(opts?: {
   return {
     jsonCalls: 0,
     textCalls: 0,
-    async json() {
+    jsonSystems: [],
+    textSystems: [],
+    async json(system) {
+      this.jsonSystems.push(system);
       this.jsonCalls += 1;
       const next = queue[Math.min(this.jsonCalls - 1, queue.length - 1)];
       if (next instanceof Error) throw next;
       return next;
     },
-    async text() {
+    async text(system) {
+      this.textSystems.push(system);
       this.textCalls += 1;
       const t = opts?.textResult;
       if (t instanceof Error) throw t;
@@ -152,6 +158,26 @@ describe("handleMessage", () => {
     const call = fakeCall({ jsonResults: [new Error("network down")], textResult: new Error("still down") });
     const r = await handleMessage(deps(call), "Fridays feel empty now", DEFAULT_STATE);
     expect(r.reply).toBe(FALLBACK_REPLY);
+  });
+  it("puts the confirmed-close instruction into the prompt of the confirming call", async () => {
+    const state: SessionState = { ...DEFAULT_STATE, stage: "explore", turn: 3, stageTurns: 1 };
+    const call = fakeCall({ jsonResults: [out({ stage: "explore" })] });
+    await handleMessage(deps(call), "Yes — chai walk this Friday. I feel better already.", state);
+    expect(call.jsonSystems[0]).toContain("forced_transition: confirmed");
+    expect(call.jsonSystems[0]).toContain("this reply is the CLOSE");
+  });
+  it("does not force close on a negated confirmation", async () => {
+    const state: SessionState = { ...DEFAULT_STATE, stage: "explore", turn: 3, stageTurns: 1 };
+    const call = fakeCall({ jsonResults: [out({ stage: "explore" })] });
+    const r = await handleMessage(deps(call), "Honestly, I don't feel better — that's it, I give up on plans.", state);
+    expect(r.state.stage).toBe("explore");
+    expect(r.state.forced).toBeUndefined();
+  });
+  it("returns FALLBACK_REPLY when the text fallback is empty", async () => {
+    const call = fakeCall({ jsonResults: [{ reply: 42 }], textResult: "" });
+    const r = await handleMessage(deps(call), "Fridays feel empty now", DEFAULT_STATE);
+    expect(r.reply).toBe(FALLBACK_REPLY);
+    expect(r.reply.trim().length).toBeGreaterThan(0);
   });
   it("logs model failures server-side", async () => {
     const err = vi.spyOn(console, "error").mockImplementation(() => {});

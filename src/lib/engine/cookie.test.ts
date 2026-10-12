@@ -37,6 +37,19 @@ describe("cookie codec", () => {
   it("rejects garbage input", () => {
     expect(decodeState("not-a-cookie", SECRET)).toEqual(DEFAULT_STATE);
   });
+  it("rejects a v1 cookie without the asked field (stale pre-asked cookie)", () => {
+    const stale = {
+      ...DEFAULT_STATE,
+      asked: undefined,
+    } as unknown as SessionState;
+    delete (stale as Record<string, unknown>).asked;
+    expect(decodeState(encodeState(stale, SECRET), SECRET)).toEqual(DEFAULT_STATE);
+  });
+  it("rejects a v1 cookie without the memory field", () => {
+    const stale = { ...DEFAULT_STATE } as Record<string, unknown>;
+    delete stale.memory;
+    expect(decodeState(encodeState(stale as SessionState, SECRET), SECRET)).toEqual(DEFAULT_STATE);
+  });
   it("keeps a full session cookie well under the 4096-byte browser limit", () => {
     expect(encodeState(full, SECRET).length).toBeLessThan(4096);
   });

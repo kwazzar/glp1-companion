@@ -4,7 +4,9 @@ import { assessSafety } from "./safety";
 describe("assessSafety", () => {
   it("flags crisis: self-harm / suicide phrasings", () => {
     for (const text of ["I want to hurt myself", "sometimes I think about ending my life",
-      "kill myself", "no point in anything anymore, I feel hopeless"]) {
+      "kill myself", "no point in anything anymore, I feel hopeless",
+      "I want to die", "maybe I should just end it all",
+      "I don't want to be here anymore", "take my own life"]) {
       expect(assessSafety(text).crisis).toBe(true);
     }
   });

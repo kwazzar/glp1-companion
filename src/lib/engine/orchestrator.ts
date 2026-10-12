@@ -22,6 +22,7 @@ export type GeminiCall = {
 const MAX_MESSAGE_LENGTH = 2000;
 const CONFIRM_RE =
   /feel(s)? a bit better|feel(s)? better|that'?s it|sounds? (doable|like a plan)|let'?s do it|i'?ll (do|try) (it|that)/i;
+const CONFIRM_NEGATION_RE = /\b(don'?t|do not|not|never|can'?t)\s+(feel|want|think)/i;
 const CONFIRM_STAGES: Stage[] = ["explore", "reframe", "cocreate"];
 
 export function parseModelOutput(raw: unknown): ModelOutput | null {
@@ -74,10 +75,14 @@ export async function handleMessage(
     ? { ...state, depressionConcern: true }
     : state;
   const confirmed =
-    CONFIRM_RE.test(message) && CONFIRM_STAGES.includes(nextStateBase.stage)
+    CONFIRM_RE.test(message) &&
+    !CONFIRM_NEGATION_RE.test(message) &&
+    CONFIRM_STAGES.includes(nextStateBase.stage)
       ? "confirmed — she just confirmed her plan: this reply is the CLOSE, brief and warm, no new questions"
       : undefined;
-  const system = buildSystemInstruction(nextStateBase);
+  const system = buildSystemInstruction(
+    confirmed ? { ...nextStateBase, forced: confirmed } : nextStateBase,
+  );
   const parsed = await callJsonWithRetry(deps.call, system, message);
   if (parsed) {
     return finish(nextStateBase, parsed.reply, parsed, confirmed);
@@ -89,7 +94,8 @@ export async function handleMessage(
     nextStateBase.turn + 1,
   );
   try {
-    const reply = await deps.call.text(system, message);
+    const text = (await deps.call.text(system, message)).trim();
+    const reply = text.length > 0 ? text : FALLBACK_REPLY;
     return finish(nextStateBase, reply, { reply, stage: heuristics.stage, user_signal: "" }, confirmed);
   } catch (err) {
     console.error("[engine] model text fallback failed:", err);

@@ -5,6 +5,10 @@ const CRISIS_PATTERNS = [
   /kill myself/,
   /suicid/,
   /end(?:ing)? my life/,
+  /take my own life/,
+  /end it all/,
+  /want to die/,
+  /don'?t want to (be here|live|wake up)/,
   /self[- ]?harm/,
   /hopeless/,
 ];

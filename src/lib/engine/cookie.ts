@@ -45,5 +45,9 @@ export function decodeState(
   ) {
     return DEFAULT_STATE;
   }
-  return state as SessionState;
+  const s = state as SessionState;
+  if (!Array.isArray(s.memory) || !Array.isArray(s.asked)) {
+    return DEFAULT_STATE;
+  }
+  return s;
 }

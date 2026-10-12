@@ -250,7 +250,7 @@ export default function Chat() {
         </button>
       </div>
       <p className="mt-2.5 text-center text-[11px] text-neutral-600">
-        Not medical advice. In crisis, contact local emergency services.
+        Not medical advice.
       </p>
     </main>
   );

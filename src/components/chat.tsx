@@ -50,7 +50,7 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [awaiting, setAwaiting] = useState(false);
   const [hintOpen, setHintOpen] = useState(false);
-  const [debugOpen, setDebugOpen] = useState(true);
+  const [debugOpen, setDebugOpen] = useState(false);
   const [debug, setDebug] = useState<DebugInfo | null>(null);
   const [opener, setOpener] = useState(OPENERS[0]);
 

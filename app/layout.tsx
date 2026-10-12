@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "GLP-1 Companion",
-  description: "An empathetic AI companion for GLP-1 therapy users — demo",
+  description: "An empathetic AI companion for GLP-1 users — demo",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -52,10 +52,14 @@ export default function Chat() {
   const [hintOpen, setHintOpen] = useState(false);
   const [debugOpen, setDebugOpen] = useState(true);
   const [debug, setDebug] = useState<DebugInfo | null>(null);
-  const [opener] = useState(
-    () =>
-      OPENERS[Math.floor(Math.random() * OPENERS.length)] ?? OPENERS[0],
-  );
+  const [opener, setOpener] = useState(OPENERS[0]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setOpener(OPENERS[Math.floor(Math.random() * OPENERS.length)] ?? OPENERS[0]);
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
   const bottom = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,6 +99,7 @@ export default function Chat() {
       await fetch("/api/chat/reset", { method: "POST" });
     } finally {
       setMessages([]);
+      setOpener(OPENERS[Math.floor(Math.random() * OPENERS.length)] ?? OPENERS[0]);
       setDebug(null);
     }
   }

@@ -21,6 +21,13 @@ const PERSONA_HINT =
   "favorite takeout and unwinding after a hard week. Now you rarely think about food, " +
   "Fridays feel hollow, and you can't explain the emptiness.";
 
+const OPENERS = [
+  "How did this Friday feel compared to the ones before?",
+  "What did Fridays used to give you that today doesn't?",
+  "If your old Friday ritual could talk, what would it say it gave you?",
+  "What's a Friday evening like for you lately?",
+];
+
 function useTypewriter(target: string, active: boolean): string {
   const [shown, setShown] = useState("");
 
@@ -45,6 +52,10 @@ export default function Chat() {
   const [hintOpen, setHintOpen] = useState(false);
   const [debugOpen, setDebugOpen] = useState(true);
   const [debug, setDebug] = useState<DebugInfo | null>(null);
+  const [opener] = useState(
+    () =>
+      OPENERS[Math.floor(Math.random() * OPENERS.length)] ?? OPENERS[0],
+  );
   const bottom = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -193,7 +204,7 @@ export default function Chat() {
         {messages.length === 0 && !awaiting && (
           <div className="mt-16 text-center">
             <p className="text-sm text-neutral-500">
-              How did this Friday feel compared to the ones before?
+              {opener}
             </p>
           </div>
         )}
